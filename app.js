@@ -1,11 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
+const debug = require('debug')('app');
 
 const app = express();
 
 // Middleware
 if (process.env.NODE_ENV.trim() === 'development') {
-  console.log('Morgan is enabled');
+  debug('Morgan is enabled');
   app.use(morgan('dev'));
 }
 
@@ -14,5 +15,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('server is listening on port 3000...');
+  debug('server is listening on port 3000...');
 });
