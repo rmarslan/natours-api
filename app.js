@@ -1,7 +1,9 @@
+const dotenv = require('dotenv');
 const express = require('express');
 const morgan = require('morgan');
 const debug = require('debug')('app');
 
+dotenv.config({ path: './config.env' });
 const app = express();
 
 // Middleware
