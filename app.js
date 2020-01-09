@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const debug = require('debug')('natours:app');
+const tourRouter = require('./routes/tourRoute');
 
 const app = express();
 
@@ -10,8 +11,6 @@ if (process.env.NODE_ENV.trim() === 'development') {
   app.use(morgan('dev'));
 }
 
-app.get('/', (req, res) => {
-  res.status(200).send('<h1>Hello World</h1>');
-});
+app.use('/tours/api/v1', tourRouter);
 
 module.exports = app;
