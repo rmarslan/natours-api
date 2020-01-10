@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const debug = require('debug')('natours:app');
 const tourRouter = require('./routes/tourRoute');
+const userRouter = require('./routes/userRoutes');
 const errorController = require('./controller/errorController');
 
 const app = express();
@@ -14,7 +15,9 @@ if (process.env.NODE_ENV.trim() === 'development') {
 }
 
 app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
+// Global error handler
 app.use(errorController);
 
 module.exports = app;

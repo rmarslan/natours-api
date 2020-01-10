@@ -12,6 +12,11 @@ if (!process.env.NODE_ENV) {
   process.exit(1);
 }
 
+if (!process.env.jwtSecretKey) {
+  debugServer(`FATAL ERROR: Please set the jwtSecretKey environment variable.`);
+  process.exit(1);
+}
+
 // Requiring the app module
 const app = require('./app');
 

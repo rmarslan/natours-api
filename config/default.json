@@ -3,5 +3,8 @@
   "db": {
     "host": "localhost:27017",
     "name": "natours"
+  },
+  "jwt": {
+    "expiresIn": "90d"
   }
 }
