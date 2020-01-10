@@ -1,58 +1,18 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const ApiFeatures = require('./../utils/apiFeatures');
 
 exports.getTours = catchAsync(async (req, res, next) => {
-  // 1) Filter the documents
+  const apiFeatures = new ApiFeatures(Tour.find(), req.query);
+  apiFeatures
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-  // 1a) Basic Filtering
-  // remove page, limit, fields and sort fields from req.query
-  let queryObj = { ...req.query };
-  const features = ['limit', 'sort', 'page', 'fields'];
-  features.forEach(el => {
-    delete queryObj[el];
-  });
+  const tours = await apiFeatures.query;
 
-  // 1b) Advanced Filtering
-  let queryStr = JSON.stringify(queryObj);
-  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-  queryObj = JSON.parse(queryStr);
-
-  // 2) Sorting
-  let query = Tour.find(queryObj);
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(',').join(' ');
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort('-createdAt');
-  }
-
-  // 3) Limit Fields
-  if (req.query.fields) {
-    if (Array.isArray(req.query.fields)) {
-      return next(new AppError('Invalid fields query parameter', 400));
-    }
-    const fields = req.query.fields.split(',').join(' ');
-    query = query.select(fields);
-  } else {
-    query = query.select('-__v');
-  }
-
-  // 4) paginate page=2, limit=5
-  const page = req.query.page * 1 || 1;
-  const pageSize = req.query.limit * 1 || 5;
-
-  // page = 2, pageSize = 5
-  // page 1: 1-5,
-  // page 2: 6-10,
-  // page 3: 11-15
-
-  const skip = (page - 1) * pageSize;
-  query = query.skip(skip).limit(pageSize);
-
-  // Evaluate the query
-  const tours = await query;
-  // const tours = await Tour.find({});
   res.status(200).json({
     status: 'success',
     data: {
