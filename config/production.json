@@ -1,7 +1,1 @@
-{
-  "appName": "Natours",
-  "db": {
-    "host": "localhost:27017",
-    "name": "natours"
-  }
-}
+{}
