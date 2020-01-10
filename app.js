@@ -13,7 +13,7 @@ if (process.env.NODE_ENV.trim() === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use('/tours/api/v1', tourRouter);
+app.use('/api/v1/tours', tourRouter);
 
 app.use(errorController);
 

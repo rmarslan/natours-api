@@ -44,7 +44,7 @@ class ApiFeatures {
 
   paginate() {
     const page = this.queryString.page * 1 || 1;
-    const pageSize = this.queryString.limit * 1 || 5;
+    const pageSize = this.queryString.limit * 1 || 100;
 
     // page = 2, pageSize = 5
     // page 1: 1-5,

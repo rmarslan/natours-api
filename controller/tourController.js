@@ -3,6 +3,13 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const ApiFeatures = require('./../utils/apiFeatures');
 
+exports.aliasTopCheapTours = (req, res, next) => {
+  req.query.sort = '-ratingsAverage, price';
+  req.query.limit = 5;
+  req.query.fields = 'name, price, ratingsAverage, difficulty, summary';
+  next();
+};
+
 exports.getTours = catchAsync(async (req, res, next) => {
   const apiFeatures = new ApiFeatures(Tour.find(), req.query);
   apiFeatures
@@ -67,5 +74,35 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+// Aggregations
+exports.getTourStats = catchAsync(async (req, res, next) => {
+  const stats = await Tour.aggregate([
+    {
+      $match: { ratingsAverage: { $gte: 4 } }
+    },
+    {
+      $group: {
+        _id: { $toUpper: '$difficulty' },
+        numTours: { $sum: 1 },
+        numRatings: { $sum: '$ratingsQuantity' },
+        avgRating: { $avg: '$ratingsAverage' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' }
+      }
+    },
+    {
+      $sort: { avgPrice: -1 }
+    }
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      stats
+    }
   });
 });

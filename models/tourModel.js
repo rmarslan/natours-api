@@ -31,7 +31,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A tour must have a difficulty'],
       enum: {
-        values: ['difficult', 'easy', 'medium'],
+        values: ['easy', 'medium', 'difficult'],
         message: 'Difficulty is either medium|difficult|easy'
       }
     },
@@ -114,7 +114,7 @@ tourSchema.pre(/^find/, function(next) {
 
 // Aggregation middleware
 tourSchema.pre('aggregate', function(next) {
-  this.pipeline.unshift({ $match: { secretTour: { $ne: true } } });
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
   next();
 });
 
