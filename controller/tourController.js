@@ -2,8 +2,26 @@ const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-exports.getTours = async (req, res, next) => {
-  const tours = await Tour.find({});
+exports.getTours = catchAsync(async (req, res, next) => {
+  // 1) Filter the documents
+
+  // Basic Filtering
+  // remove page, limit, fields and sort fields from req.query
+  let queryObj = { ...req.query };
+  const features = ['limit', 'sort', 'page', 'fields'];
+  features.forEach(el => {
+    delete queryObj[el];
+  });
+
+  // Advanced Filtering
+  let queryStr = JSON.stringify(queryObj);
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+  queryObj = JSON.parse(queryStr);
+
+  // Sorting
+
+  const tours = await Tour.find(queryObj);
+  // const tours = await Tour.find({});
   res.status(200).json({
     status: 'success',
     data: {
@@ -11,7 +29,7 @@ exports.getTours = async (req, res, next) => {
       tours: tours
     }
   });
-};
+});
 
 exports.createTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.create(req.body);

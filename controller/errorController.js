@@ -2,7 +2,9 @@ const debug = require('debug')('natours:errorController');
 const AppError = require('./../utils/appError');
 
 const handleIdCastErrorDB = err => {
-  const message = `Invalid ${err.path}: ${err.value}`;
+  const value =
+    typeof err.value === 'object' ? JSON.stringify(err.value) : err.value;
+  const message = `Invalid ${err.path}: ${value}`;
   return new AppError(message, 400);
 };
 
