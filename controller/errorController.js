@@ -1,6 +1,13 @@
 const debug = require('debug')('natours:errorController');
 const AppError = require('./../utils/appError');
 
+const handleMixOfSelectionErrorDB = () => {
+  return new AppError(
+    'Fields query param can not have mixup of selection and un-selection values',
+    400
+  );
+};
+
 const handleIdCastErrorDB = err => {
   const value =
     typeof err.value === 'object' ? JSON.stringify(err.value) : err.value;
@@ -25,8 +32,7 @@ const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
-    error: err,
-    stack: err.stack
+    error: err
   });
 };
 
@@ -61,6 +67,7 @@ module.exports = (err, req, res, next) => {
       error = handleMongooseValidationError(error);
     if (error.code === 11000) error = handleDuplicateKeyErrorDB(error);
     if (error.name === 'CastError') error = handleIdCastErrorDB(error);
+    if (error.code === 2) error = handleMixOfSelectionErrorDB();
     sendErrorProd(error, res);
   }
 };
