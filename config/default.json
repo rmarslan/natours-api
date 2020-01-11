@@ -6,5 +6,10 @@
   },
   "jwt": {
     "expiresIn": "90d"
+  },
+  "email": {
+    "host": "smtp.mailtrap.io",
+    "port": 25,
+    "username": "8dda6864620259"
   }
 }

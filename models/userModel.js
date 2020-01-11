@@ -49,7 +49,8 @@ const userSchema = new mongoose.Schema({
     }
   },
   passwordChangedAt: Date,
-  passwordResetToken: String
+  passwordResetToken: String,
+  passwordResetTokenExpiresIn: Date
 });
 
 // Run this function every time password is modified
@@ -96,6 +97,8 @@ userSchema.methods.generateSetPasswordResetToken = function() {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
+
+  this.passwordResetTokenExpiresIn = Date.now() + 10 * 60 * 1000;
   debug('Crypt Password Reset Token: ', this.passwordResetToken);
   return resetToken;
 };

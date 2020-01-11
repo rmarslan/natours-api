@@ -2,6 +2,7 @@ const debug = require('debug')('natours:authController');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const sendEmail = require('./../utils/email');
 
 const createSendToken = (user, statusCode, res) => {
   const token = user.getJwtToken();
@@ -106,12 +107,35 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.generateSetPasswordResetToken();
   debug('Reset Token: ', resetToken);
   await user.save({ validateBeforeSave: false });
+  try {
+    // 3) Send the email
+    const resetUrl = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    debug('Password Reset URL: ', resetUrl);
+    const message = `Forgot password? submit the patch request with your new password and password confirm to this url ${resetUrl}. If you didn't forget your password simply ignore this message.`;
 
-  // 3) Send the email
-  res.status(200).json({
-    status: 'success',
-    resetToken
-  });
+    await sendEmail({
+      email: user.email,
+      subject: 'Reset Password Token (Valid for 10 min)',
+      message
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token send to the email. Please check your email.'
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiresIn = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError(
+        'There was an error sending the email! try again latter.',
+        500
+      )
+    );
+  }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {});

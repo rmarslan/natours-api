@@ -1,3 +1,4 @@
 {
-  "jwtSecretKey": "jwtSecretKey"
+  "jwtSecretKey": "jwtSecretKey",
+  "emailPassword": "EMAIL_PASSWORD"
 }
