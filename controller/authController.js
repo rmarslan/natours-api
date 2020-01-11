@@ -138,4 +138,42 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = catchAsync(async (req, res, next) => {});
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1) Check token is provided
+  const { resetToken } = req.params;
+  debug('Reset Token: ', resetToken);
+  if (!resetToken)
+    return next(
+      new AppError(
+        'Please provide a reset token that is send to your email.',
+        400
+      )
+    );
+  // 1a) Encrypt the provided token
+  const encryptedToken = User.generatePasswordResetToken(resetToken);
+  debug('encryptedToken: ', encryptedToken);
+
+  // 2) Found the user based on the token and expired date
+  const user = await User.findOne({
+    passwordResetToken: encryptedToken,
+    passwordResetTokenExpiresIn: { $gt: Date.now() }
+  });
+  debug('user', user);
+  if (!user)
+    return next(new AppError('The token is invalid or has expired', 400));
+
+  // 3) set the password and confirm password
+  debug('req body: ', req.body);
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetTokenExpiresIn = undefined;
+  debug('Modified User: ', user);
+  await user.save();
+
+  // 4) Update password change at property
+  // will automatically set the passwordChangeAt property before save
+
+  // 5) login the user
+  createSendToken(user, 200, res);
+});

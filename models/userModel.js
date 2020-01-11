@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema({
 
 // Run this function every time password is modified
 //Document Middleware: Runs when Save document and create document
+
+// Set the changed password field for documents whose password is updated
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password') || this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 userSchema.pre('save', async function(next) {
   // Check if password is modified
   if (!this.isModified('password')) return next();
@@ -114,6 +122,15 @@ userSchema.statics.verifyToken = function(token) {
       }
     });
   });
+};
+
+userSchema.statics.generatePasswordResetToken = function(token) {
+  if (token) {
+    return crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+  }
 };
 
 const User = mongoose.model('User', userSchema);
