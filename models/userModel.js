@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const debug = require('debug')('natours:userModel');
 const config = require('config');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -36,7 +37,8 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Passwords are not same'
     }
-  }
+  },
+  passwordChangedAt: Date
 });
 
 // Run this function every time password is modified
@@ -62,6 +64,31 @@ userSchema.methods.getJwtToken = function() {
 
 userSchema.methods.isPasswordValid = function(candidatePassword, userPassword) {
   return bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.passwordChangedAfter = function(jwtTimeStamp) {
+  if (this.passwordChangedAt) {
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    debug('Password changed at: ', changedTimeStamp);
+    debug('Token issued at', jwtTimeStamp);
+    return changedTimeStamp > jwtTimeStamp;
+  }
+};
+
+//==========================
+// verify the JWT token
+userSchema.statics.verifyToken = function(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, config.get('jwtSecretKey'), (err, payload) => {
+      if (!err) resolve(payload);
+      else {
+        reject(err);
+      }
+    });
+  });
 };
 
 const User = mongoose.model('User', userSchema);

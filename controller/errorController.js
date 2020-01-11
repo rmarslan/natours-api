@@ -1,6 +1,10 @@
 const debug = require('debug')('natours:errorController');
 const AppError = require('./../utils/appError');
 
+const handleInvalidTokenError = () => {
+  return new AppError('The token is either invalid or expired', 400);
+};
+
 const handleMixOfSelectionErrorDB = () => {
   return new AppError(
     'Fields query param can not have mixup of selection and un-selection values',
@@ -69,6 +73,7 @@ module.exports = (err, req, res, next) => {
     if (error.code === 11000) error = handleDuplicateKeyErrorDB(error);
     if (error.name === 'CastError') error = handleIdCastErrorDB(error);
     if (error.code === 2) error = handleMixOfSelectionErrorDB();
+    if (error.name === 'JsonWebTokenError') error = handleInvalidTokenError();
     sendErrorProd(error, res);
   }
 };

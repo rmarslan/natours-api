@@ -1,3 +1,4 @@
+const debug = require('debug')('natours:authController');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -41,4 +42,39 @@ exports.loginUser = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-exports.protect = catchAsync(async (req, res, next) => {});
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) check the token exists
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token)
+    return next(
+      new AppError('You are not logged in! please login to get access', 401)
+    );
+
+  // 2) validate the token
+  const decoded = await User.verifyToken(token);
+
+  // 3) check the user exists
+  const user = await User.findById(decoded.userId);
+  debug('Found user', user);
+  if (!user)
+    return next(
+      new AppError('The user belonging to this account no longer exists', 401)
+    );
+
+  // 4) check wether password change after token issued
+  if (user.passwordChangedAfter(decoded.iat)) {
+    return next(
+      new AppError(
+        'User has recently changed the password. Please login again',
+        401
+      )
+    );
+  }
+  next();
+});
