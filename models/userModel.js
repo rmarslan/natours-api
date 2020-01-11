@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const debug = require('debug')('natours:userModel');
 const config = require('config');
 const validator = require('validator');
@@ -47,7 +48,8 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not same'
     }
   },
-  passwordChangedAt: Date
+  passwordChangedAt: Date,
+  passwordResetToken: String
 });
 
 // Run this function every time password is modified
@@ -85,6 +87,17 @@ userSchema.methods.passwordChangedAfter = function(jwtTimeStamp) {
     debug('Token issued at', jwtTimeStamp);
     return changedTimeStamp > jwtTimeStamp;
   }
+};
+
+userSchema.methods.generateSetPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  debug('Plain reset token: ', resetToken);
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  debug('Crypt Password Reset Token: ', this.passwordResetToken);
+  return resetToken;
 };
 
 //==========================
