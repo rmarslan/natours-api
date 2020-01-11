@@ -50,7 +50,12 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetTokenExpiresIn: Date
+  passwordResetTokenExpiresIn: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 // Run this function every time password is modified
@@ -72,6 +77,11 @@ userSchema.pre('save', async function(next) {
   // Remove The PasswordConfirm
   this.passwordConfirm = undefined;
 
+  next();
+});
+
+userSchema.pre(/^find/, function(next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 
