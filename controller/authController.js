@@ -177,3 +177,37 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 5) login the user
   createSendToken(user, 200, res);
 });
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+  if (!passwordCurrent || !password || !passwordConfirm)
+    return next(
+      new AppError(
+        'Please provide all fields passwordCurrent, password and passwordConfirm',
+        400
+      )
+    );
+
+  // 1) find the user
+  const user = await User.findById(req.user._id).select('+password');
+
+  // 2) validate the current password
+  if (!(await user.isPasswordValid(passwordCurrent, user.password)))
+    return next(new AppError('Your current password is wrong', 400));
+
+  // 3) update the password and save the user
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save();
+
+  // 4) login the user
+  createSendToken(user, 200, res);
+});
+
+exports.getLoggedInUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+  res.status(200).json({
+    status: 'success',
+    user
+  });
+});
