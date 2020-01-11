@@ -60,7 +60,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const decoded = await User.verifyToken(token);
 
   // 3) check the user exists
-  const user = await User.findById(decoded.userId);
+  const user = await User.findById(decoded.userId).select('+role');
   debug('Found user', user);
   if (!user)
     return next(
@@ -76,5 +76,19 @@ exports.protect = catchAsync(async (req, res, next) => {
       )
     );
   }
+
+  // 5) Grant access
+  req.user = user;
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };
+};

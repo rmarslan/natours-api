@@ -21,6 +21,15 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Please provide a valid email']
   },
   photo: String,
+  role: {
+    type: String,
+    enum: {
+      values: ['user', 'admin', 'guide', 'lead-guide'],
+      message: 'User role must be either user|admin|guide|lead-guide'
+    },
+    default: 'user',
+    select: false
+  },
   password: {
     type: String,
     minlength: [8, 'Password must be at least 8 characters long'],
