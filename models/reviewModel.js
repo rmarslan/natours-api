@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
   {
-    text: {
+    review: {
       type: String,
-      required: [true, 'Review body is required'],
+      required: [true, 'Review cannot be empty'],
       trim: true,
       minlength: 10,
       maxlength: 255
@@ -35,6 +35,12 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
+
+reviewSchema.pre(/^find/, function(next) {
+  this.populate({ path: 'userId', select: 'name photo' });
+  //   this.populate({ path: 'tourId', select: 'name' });
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 

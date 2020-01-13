@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const tourController = require('./../controller/tourController');
 const authController = require('./../controller/authController');
+const reviewRouter = require('./reviewRoute');
+
+router.use('/:tourId/reviews', reviewRouter);
 
 router.get(
   '/top-5-cheap',
@@ -25,5 +28,7 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTour
   );
+
+// tours/:tourId/reviews
 
 module.exports = router;
