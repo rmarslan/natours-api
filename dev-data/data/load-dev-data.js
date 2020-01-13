@@ -26,9 +26,7 @@ mongoose
   .then(() => debug('Connected to the database.'));
 
 // Load the data from file
-const data = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
-);
+const data = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
 //Import data into database
 const importData = async () => {
