@@ -62,28 +62,28 @@ const userSchema = new mongoose.Schema({
 //Document Middleware: Runs when Save document and create document
 
 // Set the changed password field for documents whose password is updated
-userSchema.pre('save', function(next) {
-  if (!this.isModified('password') || this.isNew) return next();
-  this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
+// userSchema.pre('save', function(next) {
+//   if (!this.isModified('password') || this.isNew) return next();
+//   this.passwordChangedAt = Date.now() - 1000;
+//   next();
+// });
 
-userSchema.pre('save', async function(next) {
-  // Check if password is modified
-  if (!this.isModified('password')) return next();
+// userSchema.pre('save', async function(next) {
+//   // Check if password is modified
+//   if (!this.isModified('password')) return next();
 
-  // Hash the password
-  this.password = await bcrypt.hash(this.password, 12);
-  // Remove The PasswordConfirm
-  this.passwordConfirm = undefined;
+//   // Hash the password
+//   this.password = await bcrypt.hash(this.password, 12);
+//   // Remove The PasswordConfirm
+//   this.passwordConfirm = undefined;
 
-  next();
-});
+//   next();
+// });
 
-userSchema.pre(/^find/, function(next) {
-  this.find({ active: { $ne: false } });
-  next();
-});
+// userSchema.pre(/^find/, function(next) {
+//   this.find({ active: { $ne: false } });
+//   next();
+// });
 
 // ========================
 userSchema.methods.getJwtToken = function() {

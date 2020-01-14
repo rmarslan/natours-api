@@ -19,12 +19,12 @@ const reviewSchema = new mongoose.Schema(
       type: Date,
       default: Date.now
     },
-    userId: {
+    user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'User ID is required']
     },
-    tourId: {
+    tour: {
       type: mongoose.Schema.ObjectId,
       ref: 'Tour',
       required: [true, 'Tour ID is required']
