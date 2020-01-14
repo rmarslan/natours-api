@@ -10,6 +10,8 @@ const fs = require('fs');
 const config = require('config');
 const debug = require('debug')('natours:importDevData');
 const Tour = require('./../../models/tourModel');
+const User = require('./../../models/userModel');
+const Review = require('./../../models/reviewModel');
 
 // Connect to the database
 const dbHost = config.get('db.host');
@@ -26,13 +28,19 @@ mongoose
   .then(() => debug('Connected to the database.'));
 
 // Load the data from file
-const data = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
+const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
+);
 
 //Import data into database
 const importData = async () => {
   try {
-    await Tour.create(data);
-    debug('Tours imported successfully.');
+    await Tour.create(tours);
+    await User.create(users, { validateBeforeSave: false });
+    await Review.create(reviews);
+    debug('Data imported successfully.');
     process.exit(0);
   } catch (err) {
     debug(err);
@@ -44,7 +52,9 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    debug('Tours deleted successfully.');
+    await User.deleteMany();
+    await Review.deleteMany();
+    debug('Data deleted successfully.');
     process.exit(0);
   } catch (err) {
     debug(err);
