@@ -1,6 +1,5 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
 const ApiFeatures = require('./../utils/apiFeatures');
 const factory = require('./factoryController');
 
@@ -30,18 +29,7 @@ exports.getTours = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getTour = catchAsync(async (req, res, next) => {
-  const { id: tourId } = req.params;
-  const tour = await Tour.findById(tourId).populate('reviews');
-  if (!tour) return next(new AppError('No tour found with the given id', 400));
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour
-    }
-  });
-});
-
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);

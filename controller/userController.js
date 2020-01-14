@@ -61,19 +61,13 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getUser = catchAsync(async (req, res, next) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not implemented yet!'
-  });
-});
-
 exports.createUser = catchAsync(async (req, res, next) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not implemented yet!'
+    message: 'This route is not implemented! please use /signup'
   });
 });
 
+exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
